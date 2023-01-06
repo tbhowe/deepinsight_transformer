@@ -14,7 +14,7 @@ class DeepInsightDataset:
     '''dataset for DeepInsight with transformers, in the form of a pytorch dataset'''
 
     def __init__(self):
-        self.data=pd.read_pickle('my_dataset/data.pickle')
+        self.data=pd.read_pickle('data.pickle')
         
     def __len__(self):
         return self.data.shape[0]
@@ -37,7 +37,7 @@ class DeepInsightDataset:
         pos_y =self.data['pos_y'].iloc[idx]
         labels=[pos_x,pos_y]
         return img, labels
-        
+
     @staticmethod
     def array_to_RGB(image):
         image = np.repeat(image[:, :, np.newaxis], 3, axis=2) # make 3-channel
