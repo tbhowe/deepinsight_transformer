@@ -4,26 +4,25 @@ from transformers import ViTModel, ViTImageProcessor, ViTConfig
 import os
 import time
 import torch.nn.functional as F
+import timm
 
 
 class DeepInsightVitModel(torch.nn.Module):
 
     def __init__(self):
         super().__init__()
-        self.model_path='google/vit-base-patch16-224-in21k'
-        self.layers = ViTModel.from_pretrained(self.model_path)
+        self.model_path='vit-base-patch16-224-in21k'
+        self.layers = timm.create_model('vit_base_patch32_224_in21k', pretrained=True, num_classes=0)
         for param in self.layers.parameters():
             param.grad_required = False  
-        self.regression_head_1=torch.nn.Linear(in_features= 768, out_features= 1)
-        self.regression_head_2=torch.nn.Linear(in_features= 768, out_features= 1)
-        self.layers.regression1 = self.regression_head_1
-        self.layers.regression2 = self.regression_head_2
+        self.regression_head_1=torch.nn.Linear(in_features= 1536, out_features= 1)
+        self.regression_head_2=torch.nn.Linear(in_features= 1536, out_features= 1)
+        
 
     def forward(self, x):
         output=self.layers(x)
-        pooler_output=output.pooler_output
-        out1 = self.layers.regression1(pooler_output)
-        out2 = self.layers.regression2(pooler_output)
+        out1 = self.regression_head_1(output)
+        out2 = self.regression_head_2(output)
         return out1,out2
     
     @staticmethod
@@ -36,6 +35,6 @@ class DeepInsightVitModel(torch.nn.Module):
         
 if __name__ == "__main__":
     model=DeepInsightVitModel()
-    model.layers()
+    model.parameters()
 
 # %%
