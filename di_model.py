@@ -36,5 +36,7 @@ class DeepInsightVitModel(torch.nn.Module):
 if __name__ == "__main__":
     model=DeepInsightVitModel()
     model.parameters()
-
+    optimiser=torch.optim.AdamW
+    lr=0.0001
+    optimiser = optimiser(model.parameters(), lr=lr, weight_decay=0.001)
 # %%
