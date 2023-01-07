@@ -32,8 +32,8 @@ class DeepInsightVitModel(torch.nn.Module):
     
     @staticmethod
     def combined_loss(out1, out2, labels):
-        loss1 = F.mse_loss(out1,labels[0])
-        loss2 = F.mse_loss(out2, labels[1])
+        loss1 = F.mse_loss(out1,labels[0].float())
+        loss2 = F.mse_loss(out2, labels[1].float())
         return loss1,loss2
         
 if __name__ == "__main__":
