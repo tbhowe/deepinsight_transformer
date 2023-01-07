@@ -15,6 +15,7 @@ class DeepInsightDataset:
 
     def __init__(self):
         self.data=pd.read_pickle('data.pickle')
+        self.feature_extractor=ViTImageProcessor.from_pretrained("google/vit-base-patch16-224-in21k")
         
     def __len__(self):
         return self.data.shape[0]
@@ -33,6 +34,7 @@ class DeepInsightDataset:
         
         img = self.data['features'].iloc[idx]
         img=self.array_to_RGB(img)
+        img=self.feature_extractor(img,return_tensors='pt')
         pos_x = self.data['pos_x'].iloc[idx]
         pos_y =self.data['pos_y'].iloc[idx]
         labels=[pos_x,pos_y]
