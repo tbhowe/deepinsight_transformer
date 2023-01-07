@@ -1,6 +1,6 @@
 #%%
 from di_dataset import DeepInsightDataset
-from model import DeepInsightVitModel
+from di_model import DeepInsightVitModel
 from torch.utils.data import random_split
 from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import DataLoader
@@ -21,8 +21,8 @@ def train(
     ):
     # init tensorboard:
     writer = SummaryWriter()
+    optimiser=optimiser(model_instance.parameters(), lr=lr, weight_decay=0.001)
     scheduler = lr_scheduler.MultiStepLR(optimiser, milestones=[5,10], gamma=0.1,verbose=True)
-    optimiser = optimiser(model.parameters(), lr=lr, weight_decay=0.001)
     batch_idx = 0
     epoch_idx= 0
 
@@ -94,18 +94,19 @@ if __name__  == "__main__":
     val_loader = DataLoader(val_set, batch_size=batch_size)
     test_loader = DataLoader(test_set, batch_size=batch_size)
 
-    model = DeepInsightVitModel
-
-    train(
-        model,
-        train_loader,
-        val_loader,
-        test_loader,
-        epochs=20,
-        lr=0.0001,
-        optimiser=torch.optim.AdamW
-        
-    )
+    model_instance = DeepInsightVitModel()
+    
+   
+    lr=0.0001
+    
+#%%
+train(model=model_instance, train_loader=train_loader, val_loader=val_loader, test_loader=test_loader)
+    # train_loader=train_loader,
+    # val_loader=val_loader,
+    # test_loader=test_loader,
+    # lr=0.0001,
+    # epochs=20,
+    # optimiser=torch.optim.AdamW,    
 
 
 
