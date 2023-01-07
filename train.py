@@ -6,6 +6,7 @@ from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import DataLoader
 from torchvision import transforms
 from torch.optim import lr_scheduler
+import torch.nn.functional as F
 import numpy as np
 import torch
 
@@ -40,13 +41,16 @@ def train(
             # forward pass
             output1, output2 = model(features)  
             # compare the predictions of each regression head to their respective labels
-            loss = model.combined_loss(output1, output2, labels)
-            loss.backward()  # calculate the gradient of the loss with respect to each model parameter
+            loss1 = F.mse_loss(output1,labels[0].float())
+            loss1.backward(retain_graph=True)
+            loss2= F.mse_loss(output2,labels[1].float())
+            loss2.backward()  # calculate the gradient of the loss with respect to each model parameter
             optimiser.step()  # use the optimiser to update the model parameters using those gradients
+            combined_loss=loss1+loss2
             print("Epoch:", epoch, "Batch:", batch_idx,
-                  "Loss:", loss.item())  # log the loss
+                  "Loss:", combined_loss.item())  # log the loss
             optimiser.zero_grad()  # zero grad
-            writer.add_scalar("Loss/Train", loss.item(), batch_idx)
+            writer.add_scalar("Loss/Train", combined_loss.item(), batch_idx)
             batch_idx += 1
             
         print('Evaluating on valiudation set')
@@ -81,7 +85,8 @@ def evaluate(model, dataloader):
     return avg_loss
 
 if __name__  == "__main__":
-    dataset = DeepInsightDataset()
+    model_instance = DeepInsightVitModel()
+    dataset = DeepInsightDataset(transform=model_instance.transform)
     train_set_len = round(0.8*len(dataset))
     val_set_len = round(0.1*len(dataset))
     test_set_len = len(dataset) - val_set_len - train_set_len
@@ -94,12 +99,12 @@ if __name__  == "__main__":
     val_loader = DataLoader(val_set, batch_size=batch_size)
     test_loader = DataLoader(test_set, batch_size=batch_size)
 
-    model_instance = DeepInsightVitModel()
+    
     
    
     lr=0.0001
     
-#%%
+
 train(model=model_instance, train_loader=train_loader, val_loader=val_loader, test_loader=test_loader)
     # train_loader=train_loader,
     # val_loader=val_loader,
