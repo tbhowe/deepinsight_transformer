@@ -3,6 +3,7 @@ import torch
 from transformers import ViTModel, ViTImageProcessor, ViTConfig
 import os
 import time
+import torch.nn.functional as F
 
 class DeepInsightVitModel(torch.nn.Module):
     def __init__(self):
@@ -21,6 +22,14 @@ class DeepInsightVitModel(torch.nn.Module):
         out1 = self.head1(pooler_output)
         out2 = self.head2(pooler_output)
         return out1,out2
+    
+    @staticmethod
+    def combined_loss(out1, out2, labels):
+        loss_fn1 = F.mse_loss()
+        loss_fn2 = F.mse_loss()
+        loss1 = loss_fn1(out1, labels[0])
+        loss2 = loss_fn2(out2, labels[1])
+        return loss1 + loss2
         
 if __name__ == "__main__":
     model=DeepInsightVitModel()
